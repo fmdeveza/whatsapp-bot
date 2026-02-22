@@ -1,6 +1,11 @@
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
 import qrcode from 'qrcode-terminal'
 
+import * as dotenv from 'dotenv'; // Or use `import 'dotenv/config'`
+dotenv.config();
+
+const safelist = JSON.parse(process.env.SAFELIST || '[]');
+
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_baileys')
 
@@ -31,21 +36,23 @@ async function connectToWhatsApp() {
     sock.ev.on('messages.upsert', async (m) => {
         console.log('Recebendo evento de mensagem...')
         
-        // m.messages é um array, pois podem chegar várias mensagens de uma vez
         const msg = m.messages[0]
 
-        // Ignora se for uma mensagem do sistema ou se não tiver conteúdo
-        if (!msg?.message) return
+        if (!msg?.message) {
+            console.log('Empty message received...')
+            return
+        }
 
-        // Captura o texto da mensagem (pode vir de diferentes tipos)
         const text = msg.message.conversation || 
                     msg.message.extendedTextMessage?.text || 
                     "Tipo de mensagem não suportado para log"
 
         const from = msg.key.remoteJid // ID de quem enviou
 
-        if (from && msg.key.fromMe === false) { // Responde apenas se não for uma mensagem enviada por nós
-            sock.sendMessage(from, { text: `Você disse: ${text}` }) // Responde com o mesmo texto
+        if (from && msg.key.fromMe === false && safelist.includes(from)) {
+            sock.sendMessage(from, { text: `Você disse: ${text}` })
+        } else {
+            console.log(`⚠️ Mensagem de [${from}] ignorada`)
         }
 
         console.log(`📩 Mensagem de [${from}]: ${JSON.stringify(msg, null, 2)}`)
