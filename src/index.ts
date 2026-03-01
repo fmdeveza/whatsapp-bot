@@ -12,10 +12,11 @@ async function main() {
 }
 
 async function connectToWhatsApp() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_baileys')
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info')
 
     const sock = makeWASocket({
         auth: state,
+        version: [2, 3000, 1033893291], // avoid Connection Failure
         // printQRInTerminal: true // deprecated
     })
 
@@ -27,15 +28,15 @@ async function connectToWhatsApp() {
             qrcode.generate(qr, { small: true })
         }
 
-        // if (connection === 'close') {
-        //     const shouldReconnect = (lastDisconnect?.error as any)?.output?.statusCode !== DisconnectReason.loggedOut
-        //     console.log('Connection closed due to an error, reconnecting...', shouldReconnect)
-        //     if (shouldReconnect) {
-        //         connectToWhatsApp()
-        //     }
-        // } else if (connection === 'open') {
-        //     console.log('✅ Connection opened successfully!')
-        // }
+        if (connection === 'close') {
+            const shouldReconnect = (lastDisconnect?.error as any)?.output?.statusCode !== DisconnectReason.loggedOut
+            console.log('Connection closed due to an error, reconnecting...', shouldReconnect)
+            if (shouldReconnect) {
+                connectToWhatsApp()
+            }
+        } else if (connection === 'open') {
+            console.log('✅ Connection opened successfully!')
+        }
 
     })
 
