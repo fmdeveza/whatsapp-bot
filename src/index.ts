@@ -4,6 +4,8 @@ import qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+import { askAbout } from './genai.js';
+
 const SAFELIST = JSON.parse(process.env.SAFELIST || '[]');
 
 async function main() {
@@ -57,7 +59,8 @@ async function connectToWhatsApp() {
         const from = msg.key.remoteJid // ID de quem enviou
 
         if (from && msg.key.fromMe === false && SAFELIST.includes(from)) {
-            sock.sendMessage(from, { text: `Você disse: ${text}` })
+            const answer: string = await askAbout(text);
+            sock.sendMessage(from, { text: `🤖 ${answer}` })
         } else {
             console.log(`⚠️ Message from [${from}] ignored`)
         }

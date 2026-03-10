@@ -6,20 +6,23 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "NODE_ENV=development ts-node src/index.ts"
+    "start": "NODE_ENV=development npx tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^1.42.0",
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "youtube-transcript-plus": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "^25.3.0",
     "@types/qrcode-terminal": "^0.12.2",
     "dotenv": "^17.3.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }
