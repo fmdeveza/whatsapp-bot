@@ -4,9 +4,10 @@ import qrcode from 'qrcode-terminal'
 import { askAbout } from './genai.js';
 import type { MessageDispatcher } from './dispatcher.js';
 
-const SAFELIST = JSON.parse(process.env.SAFELIST || '[]');
 
 export async function connectToWhatsApp(dispatcher: MessageDispatcher) {
+    const SAFELIST = JSON.parse(process.env.SAFELIST || '[]');
+
     const { state, saveCreds } = await useMultiFileAuthState('auth_info')
 
     const sock = makeWASocket({
@@ -47,12 +48,14 @@ export async function connectToWhatsApp(dispatcher: MessageDispatcher) {
 
         const text = msg.message.conversation || 
                     msg.message.extendedTextMessage?.text || 
-                    "Message type not supported for logging"
+                    "Message type not supported"
 
         const from = msg.key.remoteJid // ID de quem enviou
 
+        console.log("SAFELIST", SAFELIST)
         if (from && msg.key.fromMe === false && SAFELIST.includes(from)) {
-            const answer: string = await askAbout(text);
+            // const answer: string = await askAbout(text);
+            const answer: string = await dispatcher.dispatch({ from, rawText: text });
             sock.sendMessage(from, { text: `🤖 ${answer}` })
         } else {
             console.log(`⚠️ Message from [${from}] ignored`)
