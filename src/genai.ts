@@ -1,7 +1,7 @@
 import { GoogleGenAI, type Content, type Part, GenerateImagesResponse } from "@google/genai";
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "YOUR_KEY_HERE";
 
 const SYSTEM_INSTRUCTION = `
 # CONTEXTO
@@ -27,6 +27,7 @@ const genAI = new GoogleGenAI({
 });
 
 export async function askAbout(question: string): Promise<string> {
+  
   const youtubeUrlMatch = question.match(/(https?\:\/\/)?((www\.|m\.)?youtube\.com|youtu\.be)\/.+\n*/);
   const youtubeUrl = youtubeUrlMatch ? youtubeUrlMatch[0] : null;
 
@@ -66,7 +67,8 @@ async function askAboutVideo(question: string, youtubeUrl: string): Promise<stri
   return response.text ?? 'Não foi possível gerar uma resposta.';
 }
 
-async function runPrompt(contents: any[]): Promise<{ text: string }> {
+export async function runPrompt(contents: any[], systemInstruction: string = SYSTEM_INSTRUCTION): Promise<{ text: string }> {
+  debugPrompt(contents);
   console.log("Generating response from Gemini...");
   const startTime = Date.now();
   try {
@@ -74,7 +76,7 @@ async function runPrompt(contents: any[]): Promise<{ text: string }> {
       model: GEMINI_MODEL,
       contents: contents,
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: systemInstruction,
       },
     });
 
@@ -113,5 +115,3 @@ function debugPrompt(contents: Content[]) {
   });
   console.log("\n========================");
 }
-
-export { askAbout }
