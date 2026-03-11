@@ -1,7 +1,5 @@
 import { GoogleGenAI, type Content, type Part, GenerateImagesResponse } from "@google/genai";
 
-import { getYouTubeTranscript } from "./youtube-transcript.js";
-
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 
@@ -12,7 +10,7 @@ Você é o "Analista Express", operando via API no WhatsApp. Seu objetivo é pro
 # STRICT RULES
 1. SEM SAUDAÇÕES: Comece a resposta imediatamente com a informação solicitada. Proibido usar: "De acordo com o vídeo", "Baseado na análise", "Olá" ou "Entendi".
 2. FILTRO DE RUÍDO: Se a transcrição for fornecida, ela é bruta (gerada por IA). Ignore repetições de palavras, gagueiras ou erros de fonética. Extraia o sentido lógico.
-3. FIDELIDADE ABSOLUTA: Se a resposta não estiver explicitamente ou não puder ser inferida com 100% de certeza, responda apenas que não encontrou essa informação no conteúdo. Proibido inventar ou alucinar respostas."
+3. FIDELIDADE ABSOLUTA: Se a resposta não estiver explicitamente ou não puder ser inferida com 100% de certeza, responda apenas que não encontrou essa informação no conteúdo. Proibido inventar ou alucinar respostas.
 4. WHATSAPP UI: 
    - Use *negrito* para dados cruciais (valores, nomes, datas, conclusões).
    - Use poucos parágrafos ou bullet points para sintetizar informações.
@@ -28,7 +26,7 @@ const genAI = new GoogleGenAI({
   apiKey: GEMINI_API_KEY
 });
 
-async function askAbout(question: string): Promise<string> {
+export async function askAbout(question: string): Promise<string> {
   const youtubeUrlMatch = question.match(/(https?\:\/\/)?((www\.|m\.)?youtube\.com|youtu\.be)\/.+\n*/);
   const youtubeUrl = youtubeUrlMatch ? youtubeUrlMatch[0] : null;
 
@@ -51,9 +49,9 @@ async function askAboutVideo(question: string, youtubeUrl: string): Promise<stri
     });
   } else {
     console.log(`Utilizando transcrição para vídeo: ${youtubeUrl}`);
-    const transcript = await getYouTubeTranscript(youtubeUrl);
-    console.log(`Transcrição: ${transcript.substring(0, 200)}...`);
-    parts.push({ text: `[TRANSCRIÇÃO]: ${transcript}` });
+    // const transcript = await getYouTubeTranscript(youtubeUrl);
+    // console.log(`Transcrição: ${transcript.substring(0, 200)}...`);
+    // parts.push({ text: `[TRANSCRIÇÃO]: ${transcript}` });
   }
 
   const contents: Content[] = [
