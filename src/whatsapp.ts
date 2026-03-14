@@ -1,7 +1,6 @@
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
 import qrcode from 'qrcode-terminal'
 
-import { askAbout } from './genai.js';
 import type { MessageDispatcher } from './dispatcher.js';
 
 
@@ -54,14 +53,13 @@ export async function connectToWhatsApp(dispatcher: MessageDispatcher) {
 
         console.log("SAFELIST", SAFELIST)
         if (from && msg.key.fromMe === false && SAFELIST.includes(from)) {
-            // const answer: string = await askAbout(text);
             const answer: string = await dispatcher.dispatch({ from, rawText: text });
             sock.sendMessage(from, { text: `🤖 ${answer}` })
         } else {
             console.log(`⚠️ Message from [${from}] ignored`)
         }
 
-        console.debug(`DEBUG [${from}]: ${JSON.stringify(msg, null, 2)}`)
+        // console.debug(`DEBUG [${from}]: ${JSON.stringify(msg, null, 2)}`)
     })
 
     sock.ev.on('creds.update', saveCreds)
