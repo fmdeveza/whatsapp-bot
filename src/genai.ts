@@ -21,54 +21,12 @@ Analise video ou [TRANSCRIÇÃO] focando apenas na [PERGUNTA DO USUÁRIO] e gere
 
 `;
 
-
 const genAI = new GoogleGenAI({
   apiKey: GEMINI_API_KEY
 });
 
-export async function askAbout(question: string): Promise<string> {
-  
-  const youtubeUrlMatch = question.match(/(https?\:\/\/)?((www\.|m\.)?youtube\.com|youtu\.be)\/.+\n*/);
-  const youtubeUrl = youtubeUrlMatch ? youtubeUrlMatch[0] : null;
-
-  if (youtubeUrl) {
-    return askAboutVideo(question, youtubeUrl);
-  }
-
-  return 'Não foi possível identificar um vídeo do YouTube na pergunta.';
-}
-
-async function askAboutVideo(question: string, youtubeUrl: string): Promise<string> {
-  const parts: Part[] = [];
-  parts.push({ text: `# DADOS DE ENTRADA\n\n[PERGUNTA DO USUÁRIO]: ${question}\n` });
-  if (youtubeUrl && question.startsWith("Assista")) {
-    console.log(`Utilizando fileUri para o vídeo: ${youtubeUrl}`);
-    parts.push({
-      fileData: {
-        fileUri: youtubeUrl,
-      },
-    });
-  } else {
-    console.log(`Utilizando transcrição para vídeo: ${youtubeUrl}`);
-    // const transcript = await getYouTubeTranscript(youtubeUrl);
-    // console.log(`Transcrição: ${transcript.substring(0, 200)}...`);
-    // parts.push({ text: `[TRANSCRIÇÃO]: ${transcript}` });
-  }
-
-  const contents: Content[] = [
-    {
-      role: 'user',
-      parts,
-    },
-  ];
-
-  const response = await runPrompt(contents);
-
-  return response.text ?? 'Não foi possível gerar uma resposta.';
-}
-
-export async function runPrompt(contents: any[], systemInstruction: string = SYSTEM_INSTRUCTION): Promise<{ text: string }> {
-  debugPrompt(contents);
+export async function runPrompt(contents: Content[], systemInstruction: string = SYSTEM_INSTRUCTION): Promise<{ text: string }> {
+  debugPrompt(contents, systemInstruction);
   console.log("Generating response from Gemini...");
   const startTime = Date.now();
   try {
@@ -80,12 +38,20 @@ export async function runPrompt(contents: any[], systemInstruction: string = SYS
       },
     });
 
-    console.log("\n=== GEMINI ANSWER ===\n");
+    console.log("\n=== GEMINI ANSWER ===");
     console.log(response.text);
-    console.log("\n========================");
-    
-    console.log("Gemini answer char count:", response.text?.length);
-    console.log(`Execution time: ${Date.now() - startTime} ms`);
+
+    const usage = response.usageMetadata;
+    if (usage) {
+      console.log("\n=== TOKEN USAGE ===");
+      console.log(`  Char count:     ${response.text?.length ?? 'N/A'}`);
+      console.log(`  Execution time: ${Date.now() - startTime} ms`);
+      console.log(`  Prompt tokens:     ${usage.promptTokenCount ?? 'N/A'}`);
+      console.log(`  Response tokens:   ${usage.candidatesTokenCount ?? 'N/A'}`);
+      console.log(`  Total tokens:      ${usage.totalTokenCount ?? 'N/A'}`);
+      console.log("===================\n");
+    }
+
     return { text: response.text ?? 'Não foi possível gerar uma resposta.' };
 
   } catch (error) {
@@ -94,10 +60,10 @@ export async function runPrompt(contents: any[], systemInstruction: string = SYS
   }
 }
 
-function debugPrompt(contents: Content[]) {
+function debugPrompt(contents: Content[], systemInstruction: string) {
   const fullTrim = (str: string) => str.trim().replace(/^[ \t]+/gm, '').replace(/ +/g, ' ');
   console.log("\n=== FULL PROMPT DEBUG ===\n");
-  console.log(`[SYSTEM INSTRUCTION]\n${SYSTEM_INSTRUCTION.trim()}\n`);
+  console.log(`[SYSTEM INSTRUCTION]\n${systemInstruction.trim()}\n`);
   contents.forEach((content, i) => {
     // console.log(`\n[MESSAGE ${i + 1}] role: ${content.role}`);
     (content.parts as Part[]).forEach((part, j) => {
