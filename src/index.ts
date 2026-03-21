@@ -1,16 +1,8 @@
 import { connectToWhatsApp } from './whatsapp.js';
-import { MessageDispatcher } from './dispatcher.js';
-import { YoutubeHandler } from './youtube.handler.js';
-// import { FallbackHandler } from './fallback.handler.js';
-
-import * as dotenv from 'dotenv';
-dotenv.config();
+import { createDispatcher } from './dispatcher.js';
 
 async function main() {
-    const dispatcher = new MessageDispatcher()
-      .register(new YoutubeHandler());
-    //   .register(new FallbackHandler()); // fallback at last
-    
+    const dispatcher = createDispatcher();
     connectToWhatsApp(dispatcher);
 }
 

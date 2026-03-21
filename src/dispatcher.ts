@@ -1,5 +1,7 @@
 
 import type { MessageHandler, MessageContext } from './handler.interface.js';
+import { YoutubeHandler } from './youtube.handler.js';
+import { FallbackHandler } from './fallback.handler.js';
 
 export class MessageDispatcher {
   private handlers: MessageHandler[] = [];
@@ -15,6 +17,12 @@ export class MessageDispatcher {
         return handler.handle(context);
       }
     }
-    return 'Não entendi a mensagem.';
+    return '...';
   }
+}
+
+export function createDispatcher(): MessageDispatcher {
+  return new MessageDispatcher()
+    .register(new YoutubeHandler())
+    .register(new FallbackHandler());
 }

@@ -1,5 +1,8 @@
 import { GoogleGenAI, type Content, type Part, GenerateImagesResponse } from "@google/genai";
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "YOUR_KEY_HERE";
 
