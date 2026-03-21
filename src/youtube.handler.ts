@@ -6,22 +6,22 @@ import { runPrompt } from './genai.js';
 
 const YT_URL_REGEX = /(https?\:\/\/)?((www\.|m\.)?youtube\.com|youtu\.be)\/.+/;
 
-const YT_SYSTEM_PROMPT = `
-# PAPEL
-Você é um assistente especializado em analisar conteúdos (vídeos ou transcrições) e fornecer respostas precisas, rápidas e formatadas para WhatsApp e leitura em smartphones.
+const YT_SYSTEM_PROMPT = `Você análisa vídeos e transcrições de vídeos YouTube para WhatsApp. Responda APENAS com informação do conteúdo.
 
-# REGRAS DE COMPORTAMENTO
-1. DIRETO AO PONTO: Inicie a resposta com a informação principal. Não utilize saudações, despedidas ou frases introdutórias (ex: "Aqui está", "Baseado no vídeo").
-2. TOLERÂNCIA A ERROS MÍNIMOS: Transcrições geradas por IA contêm falhas (gagueiras, repetições, erros de grafia). Ignore a sintaxe falha e concentre-se em extrair o significado central.
-3. CONFIABILIDADE (ANTI-ALUCINAÇÃO): Baseie sua resposta APENAS no conteúdo fornecido. Se a resposta para a pergunta não estiver presente ou não puder ser inferida com total segurança, responda apenas: "Essa informação não está disponível neste conteúdo."
+REGRAS:
+1. Inicie direto com a resposta - sem saudações ou introduções
+2. Transcrições têm erros (IA): ignore sintaxe, extraia o significado
+3. Se a resposta não está no conteúdo, responda: "Essa informação não está disponível neste conteúdo."
+4. Formate como WhatsApp: *negrito*, bullet points, máximo 1024 caracteres
+`;
 
-# REGRAS DE FORMATAÇÃO (WHATSAPP UI)
-- Escreva como uma mensagem de WhatsApp usando *negrito* e bullet points quando achar necessário para legibilidade.
-- Seja extremamente conciso. Mantenha a resposta em poucas palavras até 777 caracteres sempre que possível.
+const YT_SYSTEM_PROMPT_DETAILED = `Você análisa vídeos e transcrições de vídeos. Responda APENAS com informação do conteúdo.
 
-# TAREFA
-Analise o conteúdo a seguir e responda à pergunta do usuário aplicando estritamente as regras acima.
-`
+REGRAS:
+1. Inicie direto com a resposta - sem saudações ou introduções
+2. Transcrições têm erros (IA): ignore sintaxe, extraia o significado
+3. Se a resposta não está no conteúdo, responda: "Essa informação não está disponível neste conteúdo."
+`;
 
 async function getYouTubeTranscript(url: string): Promise<string> {
     try {
@@ -66,7 +66,13 @@ export class YoutubeHandler implements MessageHandler {
       ],
     }];
 
-    const response = await runPrompt(contents, YT_SYSTEM_PROMPT);
+    let response: { text?: string };
+    if (ctx.rawText.includes("detalhadamente")) {
+      response = await runPrompt(contents, YT_SYSTEM_PROMPT_DETAILED);
+    } else {
+      response = await runPrompt(contents, YT_SYSTEM_PROMPT);
+    }
+
     return response.text ?? 'Não foi possível responder.';
   }
 
