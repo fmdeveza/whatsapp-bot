@@ -10,17 +10,19 @@ const YT_SYSTEM_PROMPT = `Você análisa vídeos e transcrições de vídeos You
 
 REGRAS:
 1. Inicie direto com a resposta - sem saudações ou introduções
-2. Transcrições têm erros (IA): ignore sintaxe, extraia o significado
-3. Se a resposta não está no conteúdo, responda: "Essa informação não está disponível neste conteúdo."
-4. Formate como WhatsApp: *negrito*, bullet points, máximo 1024 caracteres
+2. Seja claro e objetivo.
+3. Transcrições têm erros (IA): ignore sintaxe, extraia o significado
+4. Se a resposta não está no conteúdo, responda: "Essa informação não está disponível neste conteúdo."
+5. Formate como WhatsApp: *negrito*, bullet points, máximo 1024 caracteres
 `;
 
 const YT_SYSTEM_PROMPT_DETAILED = `Você análisa vídeos e transcrições de vídeos. Responda APENAS com informação do conteúdo.
 
 REGRAS:
 1. Inicie direto com a resposta - sem saudações ou introduções
-2. Transcrições têm erros (IA): ignore sintaxe, extraia o significado
-3. Se a resposta não está no conteúdo, responda: "Essa informação não está disponível neste conteúdo."
+2. Seja claro e objetivo.
+3. Transcrições têm erros (IA): ignore sintaxe, extraia o significado
+4. Se a resposta não está no conteúdo, responda: "Essa informação não está disponível neste conteúdo."
 `;
 
 async function getYouTubeTranscript(url: string): Promise<string> {
